@@ -10,7 +10,7 @@ public class InimigoAtiradorController : InimigoController
     Transform alvo;
     float distanciay = 2f;
     float timer;
-    float tempoEntreTiros = 2.5f;
+    float tempoEntreTiros = 1.5f;
 
 
     // Update is called once per frame
@@ -33,18 +33,11 @@ public class InimigoAtiradorController : InimigoController
             }
         }
     }
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.CompareTag("Player"))
-        {
-            Atirar();
-        }
-    }
     private void OnTriggerStay2D(Collider2D collision)
     {
-        timer += Time.deltaTime;
         if (collision.CompareTag("Player"))
         {
+            timer += Time.deltaTime;
             alvo = collision.transform;
             //movimentacao é o novo movimento do inimigo quando o jogador vira o alvo
             Vector2 movimentacao = new Vector2(0, alvo.position.y - transform.position.y).normalized;
@@ -53,6 +46,7 @@ public class InimigoAtiradorController : InimigoController
             if (Mathf.Abs(alvo.transform.position.y - transform.position.y) < distanciay && timer >= tempoEntreTiros)
             {
                 Atirar();
+                timer = 0;
             }
         }
     }
@@ -70,13 +64,11 @@ public class InimigoAtiradorController : InimigoController
         {
             GameObject tiroInimigo = Instantiate(tiro, localTiro.transform.position, Quaternion.identity);
             tiroInimigo.GetComponent<TiroInimigoController>().velocidadeTiro *= -1;
-            timer = 0f;
         }
-        else
+        else if(transform.eulerAngles.y == 180)
         {
             GameObject tiroInimigo = Instantiate(tiro, localTiro.transform.position, Quaternion.identity);
             tiroInimigo.GetComponent<SpriteRenderer>().flipX = true;
-            timer = 0f;
         }
     }
 }

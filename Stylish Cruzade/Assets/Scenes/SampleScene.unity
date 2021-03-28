@@ -417,10 +417,12 @@ MonoBehaviour:
   espada: 0
   espadaAereo: 0
   forcaPulo: 8
+  qtdPulos: 0
   forcaDash: 10
   dashAtivo: 0
   dashTimer: 0.25
   direcaoDash: 0
+  invencivel: 0
 --- !u!95 &406035089
 Animator:
   serializedVersion: 3
@@ -622,9 +624,9 @@ CircleCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.7724777, y: -0.037843432}
+  m_Offset: {x: -0.8609014, y: -0.121349886}
   serializedVersion: 2
-  m_Radius: 0.5382349
+  m_Radius: 0.53331816
 --- !u!1 &786466165
 GameObject:
   m_ObjectHideFlags: 0
@@ -986,8 +988,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1986248212}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.073, y: -0.147, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.05099998, y: -0.15300001, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 778373678}
@@ -1000,21 +1002,17 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 2954291008711413744, guid: 8876b600aed29624587b1fdbe9cefed3, type: 3}
-      propertyPath: m_FlipX
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 2954291008711413745, guid: 8876b600aed29624587b1fdbe9cefed3, type: 3}
       propertyPath: m_RootOrder
       value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 2954291008711413745, guid: 8876b600aed29624587b1fdbe9cefed3, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -6.38
+      value: 2.4
       objectReference: {fileID: 0}
     - target: {fileID: 2954291008711413745, guid: 8876b600aed29624587b1fdbe9cefed3, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -1.12
+      value: -0.99
       objectReference: {fileID: 0}
     - target: {fileID: 2954291008711413745, guid: 8876b600aed29624587b1fdbe9cefed3, type: 3}
       propertyPath: m_LocalPosition.z

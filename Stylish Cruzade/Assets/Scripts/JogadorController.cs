@@ -21,6 +21,10 @@ public class JogadorController : MonoBehaviour
     public float direcaoDash;
     int contadorDash;
 
+    public bool invencivel;
+    float tempoInvencibilidade = 0f;
+
+
     Rigidbody2D fisicaJogador;
     Animator anim;
 
@@ -29,6 +33,7 @@ public class JogadorController : MonoBehaviour
     {
         fisicaJogador = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
+        invencivel = false;
     }
 
     // Update is called once per frame
@@ -53,6 +58,7 @@ public class JogadorController : MonoBehaviour
 
         if (contatoChao)
         {
+            anim.ResetTrigger("Pulo");
             anim.ResetTrigger("Pulo Duplo");
             anim.SetTrigger("Chao");
             anim.SetBool("Ataque Aereo", false);
@@ -69,20 +75,23 @@ public class JogadorController : MonoBehaviour
         //Pulo do jogador
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (contatoChao)
+            if (!invencivel)
             {
-                qtdPulos++;
-                contatoChao = false;
-                fisicaJogador.velocity = new Vector2(fisicaJogador.velocity.x, forcaPulo);
-            }
-            else
-            {
-                //Pulo duplo
-                if (qtdPulos < 2)
+                if (contatoChao)
                 {
-                    fisicaJogador.velocity = new Vector2(fisicaJogador.velocity.x, 0.8f * forcaPulo);
                     qtdPulos++;
-                    anim.SetTrigger("Pulo Duplo");
+                    contatoChao = false;
+                    fisicaJogador.velocity = new Vector2(fisicaJogador.velocity.x, forcaPulo);
+                }
+                else
+                {
+                    //Pulo duplo
+                    if (qtdPulos < 2)
+                    {
+                        fisicaJogador.velocity = new Vector2(fisicaJogador.velocity.x, 0.8f * forcaPulo);
+                        qtdPulos++;
+                        anim.SetTrigger("Pulo Duplo");
+                    }
                 }
             }
         }
@@ -97,12 +106,15 @@ public class JogadorController : MonoBehaviour
         //Dash do jogador
         if (Input.GetKeyDown(KeyCode.Z) && contadorDash < 1)
         {
-            dashAtivo = true;
-            timerAtualDash = dashTimer;
-            fisicaJogador.velocity = Vector2.zero;
-            if (!contatoChao)
+            if (!invencivel)
             {
-                contadorDash++;
+                dashAtivo = true;
+                timerAtualDash = dashTimer;
+                fisicaJogador.velocity = Vector2.zero;
+                if (!contatoChao)
+                {
+                    contadorDash++;
+                }
             }
         }
         if (contatoChao)
@@ -126,6 +138,10 @@ public class JogadorController : MonoBehaviour
             {
                 dashAtivo = false;
             }
+            if (espadaAereo)
+            {
+                espadaAereo = false;
+            }
         }
         else
         {
@@ -135,21 +151,29 @@ public class JogadorController : MonoBehaviour
         //Ataque aereo com a espada
         if (Input.GetKeyDown(KeyCode.X) && !contatoChao)
         {
-            espadaAereo = true;
-            mudancaDirecao = false;
+            if (!invencivel)
+            {
+                espadaAereo = true;
+                mudancaDirecao = false;
+            }
         }
 
         if (espadaAereo)
         {
-            anim.SetBool("Ataque Aereo", true);
+            anim.ResetTrigger("Pulo");
+            anim.SetTrigger("Ataque Aereo");
+            mudancaDirecao = true;
         }
 
         //Ataque com a espada
         if (Input.GetKeyDown(KeyCode.X) && contatoChao)
         {
-            espada = true;
-            controleAtivo = false;
-            mudancaDirecao = false;
+            if (!invencivel)
+            {
+                espada = true;
+                controleAtivo = false;
+                mudancaDirecao = false;
+            }
         }
 
         if (espada)
@@ -157,6 +181,21 @@ public class JogadorController : MonoBehaviour
             anim.SetTrigger("Ataque");
             fisicaJogador.velocity = new Vector2(0, fisicaJogador.velocity.y);
             espada = false;
+        }
+
+        // Invencibilidade após tomar dano
+        if (invencivel)
+        {
+
+            tempoInvencibilidade += Time.deltaTime;
+            if (tempoInvencibilidade > 2f)
+            {
+                invencivel = false;
+                tempoInvencibilidade = 0;
+                anim.SetBool("Dano", false);
+                mudancaDirecao = true;
+                controleAtivo = true;
+            }
         }
     }
     
@@ -172,10 +211,34 @@ public class JogadorController : MonoBehaviour
         if (objetoColidido.gameObject.CompareTag("Chao"))
         {
             contatoChao = true;
-            espadaAereo = false;
-            controleAtivo = true;
-            mudancaDirecao = true;
             qtdPulos = 0;
         }
+        if (!invencivel)
+        {
+            if (objetoColidido.gameObject.CompareTag("Chao"))
+            {
+                
+                espadaAereo = false;
+                controleAtivo = true;
+                mudancaDirecao = true;
+            }
+
+            if (objetoColidido.gameObject.CompareTag("Enemy") || objetoColidido.gameObject.CompareTag("Tiro Inimigo"))
+            {
+                TomarDano(objetoColidido);
+            }
+        }
+    }
+    void TomarDano(Collision2D Inimigo)
+    {
+        mudancaDirecao = false;
+        controleAtivo = false;
+        Vector2 direcaoRecuo = (Inimigo.transform.position - transform.position).normalized;
+        Vector2 forcaRecuo = new Vector2(80 * -direcaoRecuo.x, 300);
+        fisicaJogador.velocity = Vector2.zero;
+        fisicaJogador.AddForce(forcaRecuo);
+        anim.SetBool("Dano", true);
+
+        invencivel = true;
     }
 }
