@@ -27,12 +27,14 @@ public class JogadorController : MonoBehaviour
 
     Rigidbody2D fisicaJogador;
     Animator anim;
+    BoxCollider2D colisorEspada;
 
     // Start is called before the first frame update
     void Start()
     {
         fisicaJogador = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
+        colisorEspada = GetComponent<BoxCollider2D>();
         invencivel = false;
     }
 
@@ -201,9 +203,19 @@ public class JogadorController : MonoBehaviour
     
     private void OnTriggerEnter2D(Collider2D objetoColidido)
     {
-        if (objetoColidido.gameObject.CompareTag("Enemy") && objetoColidido is BoxCollider2D)
+        if (colisorEspada.isActiveAndEnabled)
         {
-            Destroy(objetoColidido.gameObject);
+            if (objetoColidido.gameObject.CompareTag("Enemy") && objetoColidido is BoxCollider2D)
+            {
+                Destroy(objetoColidido.gameObject);
+            }
+        }
+        else
+        {
+            if (objetoColidido.gameObject.CompareTag("Enemy") && objetoColidido is BoxCollider2D)
+            {
+                TomarDano(objetoColidido);
+            }
         }
     }
     private void OnCollisionEnter2D(Collision2D objetoColidido)
@@ -225,11 +237,11 @@ public class JogadorController : MonoBehaviour
 
             if (objetoColidido.gameObject.CompareTag("Enemy") || objetoColidido.gameObject.CompareTag("Tiro Inimigo"))
             {
-                TomarDano(objetoColidido);
+                TomarDano(objetoColidido.collider);
             }
         }
     }
-    void TomarDano(Collision2D Inimigo)
+    void TomarDano(Collider2D Inimigo)
     {
         mudancaDirecao = false;
         controleAtivo = false;

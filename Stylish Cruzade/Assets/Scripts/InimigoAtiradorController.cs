@@ -5,12 +5,13 @@ using UnityEngine;
 public class InimigoAtiradorController : InimigoController
 {
     [Header("As variáveis abaixo são exclusivas de inimigos que atiram")]
-    public GameObject tiro;
     public GameObject localTiro;
     Transform alvo;
     float distanciay = 2f;
     float timer;
-    float tempoEntreTiros = 1.5f;
+    float tempoEntreTiros = 1.2f;
+
+    public PoolingTiro poolingDotiro;
 
 
     // Update is called once per frame
@@ -33,6 +34,7 @@ public class InimigoAtiradorController : InimigoController
             }
         }
     }
+
     private void OnTriggerStay2D(Collider2D collision)
     {
         if (collision.CompareTag("Player"))
@@ -62,12 +64,16 @@ public class InimigoAtiradorController : InimigoController
     {
         if (transform.eulerAngles.y == 0)
         {
-            GameObject tiroInimigo = Instantiate(tiro, localTiro.transform.position, Quaternion.identity);
+            GameObject tiroInimigo = poolingDotiro.PegaObjeto();
+            tiroInimigo.transform.position = localTiro.transform.position;
+            tiroInimigo.SetActive(true);
             tiroInimigo.GetComponent<TiroInimigoController>().velocidadeTiro *= -1;
         }
-        else if(transform.eulerAngles.y == 180)
+        if(transform.eulerAngles.y == 180)
         {
-            GameObject tiroInimigo = Instantiate(tiro, localTiro.transform.position, Quaternion.identity);
+            GameObject tiroInimigo = poolingDotiro.PegaObjeto();
+            tiroInimigo.transform.position = localTiro.transform.position;
+            tiroInimigo.SetActive(true);
             tiroInimigo.GetComponent<SpriteRenderer>().flipX = true;
         }
     }

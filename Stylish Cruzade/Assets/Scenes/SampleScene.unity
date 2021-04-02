@@ -489,7 +489,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: -0.038063228, y: -0.05269918}
@@ -588,8 +588,8 @@ MonoBehaviour:
   pontos:
   - {fileID: 298187958}
   - {fileID: 1830126496}
-  tiro: {fileID: 2954291008711413756, guid: 8876b600aed29624587b1fdbe9cefed3, type: 3}
   localTiro: {fileID: 1986248212}
+  poolingDotiro: {fileID: 1483617744}
 --- !u!50 &778373680
 Rigidbody2D:
   serializedVersion: 4
@@ -624,9 +624,9 @@ CircleCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.8609014, y: -0.121349886}
+  m_Offset: {x: -0.9061621, y: -0.121349886}
   serializedVersion: 2
-  m_Radius: 0.53331816
+  m_Radius: 0.5286359
 --- !u!1 &786466165
 GameObject:
   m_ObjectHideFlags: 0
@@ -935,6 +935,53 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1483617743
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1483617745}
+  - component: {fileID: 1483617744}
+  m_Layer: 0
+  m_Name: PoolingTiroInimigo
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1483617744
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1483617743}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 759567782734c904f91bd589fa788b78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objetoParaInstanciar: {fileID: 2954291008711413756, guid: 8876b600aed29624587b1fdbe9cefed3, type: 3}
+  comecaInstanciado: 4
+  listaDeObjetos: []
+  podeAumentar: 0
+--- !u!4 &1483617745
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1483617743}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.66878116, y: -0.14395328, z: -0.0036382675}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 10
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1830126495
 GameObject:
   m_ObjectHideFlags: 0
@@ -1008,7 +1055,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2954291008711413745, guid: 8876b600aed29624587b1fdbe9cefed3, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2.4
+      value: 1.61
       objectReference: {fileID: 0}
     - target: {fileID: 2954291008711413745, guid: 8876b600aed29624587b1fdbe9cefed3, type: 3}
       propertyPath: m_LocalPosition.y
