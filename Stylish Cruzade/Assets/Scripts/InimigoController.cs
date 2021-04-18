@@ -11,11 +11,14 @@ public class InimigoController : MonoBehaviour
     protected Rigidbody2D fisicaInimigo;
     protected SpriteRenderer spriteInimigo;
     public Transform[] pontos;
+    protected Animator anim;
+
     // Start is called before the first frame update
     protected virtual void Start()
     {
         fisicaInimigo = GetComponent<Rigidbody2D>();
         spriteInimigo = GetComponent<SpriteRenderer>();
+        anim = GetComponent<Animator>();
     }
 
     // Update is called once per frame

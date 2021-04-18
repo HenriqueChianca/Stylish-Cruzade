@@ -1,13 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.Tilemaps;
 
 public class JogadorController : MonoBehaviour
 {
     public int velocidade = 8;
     bool controleAtivo;
     bool mudancaDirecao;
-    public bool contatoChao;
     public bool espada;
     public bool espadaAereo;
     public float forcaPulo = 6;
@@ -25,9 +26,26 @@ public class JogadorController : MonoBehaviour
     float tempoInvencibilidade = 0f;
 
 
+    public int vidaJogador;
+    int vidaMax;
+    public bool morteQueda = false;
+    public Timer cronometro;
+
+    public LayerMask layerChao;
+    public Transform posicaoPe;
+    public float raioChecarChao = 0.2f;
+    public bool contatoChao = false;
+
+
     Rigidbody2D fisicaJogador;
     Animator anim;
     BoxCollider2D colisorEspada;
+    CapsuleCollider2D colisor;
+
+    public AudioClip somEspada;
+    public AudioClip somDano;
+    public AudioClip somDash;
+    AudioSource audioJogador;
 
     // Start is called before the first frame update
     void Start()
@@ -35,13 +53,19 @@ public class JogadorController : MonoBehaviour
         fisicaJogador = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         colisorEspada = GetComponent<BoxCollider2D>();
+        audioJogador = GetComponent<AudioSource>();
+        colisor = GetComponent<CapsuleCollider2D>();
+
         invencivel = false;
+
+        vidaMax = 6;
+        vidaJogador = vidaMax;
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        contatoChao = Physics2D.OverlapCircle(posicaoPe.position, raioChecarChao, layerChao);
         //Movimentação do jogador. ControleAtivo serve para travar o jogador no momento que atacar.
         float controleJogador = Input.GetAxis("Horizontal");
         if (controleAtivo)
@@ -58,13 +82,21 @@ public class JogadorController : MonoBehaviour
             transform.eulerAngles = new Vector3(0, 180, 0);
         }
 
+
         if (contatoChao)
         {
-            anim.ResetTrigger("Pulo");
-            anim.ResetTrigger("Pulo Duplo");
-            anim.SetTrigger("Chao");
+            anim.SetBool("Chao", true);
             anim.SetBool("Ataque Aereo", false);
-            if (fisicaJogador.velocity.x == 0)
+
+            qtdPulos = 0;
+            if (!invencivel)
+            {
+                espadaAereo = false;
+                controleAtivo = true;
+                mudancaDirecao = true;
+            }
+
+            if (controleJogador == 0)
             {
                 anim.SetBool("Andando", false);
             }
@@ -73,49 +105,49 @@ public class JogadorController : MonoBehaviour
                 anim.SetBool("Andando", true);
             }
         }
+        else
+        {
+            anim.SetBool("Chao", false);
+        }
+        
 
         //Pulo do jogador
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (!invencivel)
+            if (!invencivel && qtdPulos < 2)
             {
-                if (contatoChao)
+                anim.SetBool("Chao", false);
+                anim.SetTrigger("Pulo");
+                if (qtdPulos == 0)
                 {
-                    qtdPulos++;
-                    contatoChao = false;
                     fisicaJogador.velocity = new Vector2(fisicaJogador.velocity.x, forcaPulo);
                 }
-                else
+                if (qtdPulos == 1)
                 {
-                    //Pulo duplo
-                    if (qtdPulos < 2)
-                    {
-                        fisicaJogador.velocity = new Vector2(fisicaJogador.velocity.x, 0.8f * forcaPulo);
-                        qtdPulos++;
-                        anim.SetTrigger("Pulo Duplo");
-                    }
+                    fisicaJogador.velocity = new Vector2(fisicaJogador.velocity.x, 0.8f * forcaPulo);
+                    anim.SetTrigger("Pulo Duplo");
                 }
+                qtdPulos++;
             }
         }
-        if (!contatoChao)
-        {
-            if (qtdPulos < 2)
-            {
-                anim.SetTrigger("Pulo");
-            }
-        }
+
+        RaycastHit2D podeDash = Physics2D.Raycast(transform.position, new Vector2(controleJogador, 0), 3);
 
         //Dash do jogador
         if (Input.GetKeyDown(KeyCode.Z) && contadorDash < 1)
         {
-            if (!invencivel)
+            if (!podeDash.collider.CompareTag("Chao"))
             {
-                dashAtivo = true;
-                timerAtualDash = dashTimer;
-                fisicaJogador.velocity = Vector2.zero;
-                if (!contatoChao)
+                if (!invencivel)
                 {
-                    contadorDash++;
+                    dashAtivo = true;
+                    timerAtualDash = dashTimer;
+                    fisicaJogador.velocity = Vector2.zero;
+                    audioJogador.PlayOneShot(somDash);
+                    if (!contatoChao)
+                    {
+                        contadorDash++;
+                    }
                 }
             }
         }
@@ -134,7 +166,10 @@ public class JogadorController : MonoBehaviour
                 direcaoDash = -1;
             }
             anim.SetBool("Dash", true);
-            fisicaJogador.velocity = new Vector2(direcaoDash * forcaDash,0);
+            if (!invencivel)
+            {
+                fisicaJogador.velocity = new Vector2(direcaoDash * forcaDash, 0);
+            }
             timerAtualDash -= Time.deltaTime;
             if (timerAtualDash <= 0)
             {
@@ -157,6 +192,7 @@ public class JogadorController : MonoBehaviour
             {
                 espadaAereo = true;
                 mudancaDirecao = false;
+                audioJogador.PlayOneShot(somDash);
             }
         }
 
@@ -172,6 +208,8 @@ public class JogadorController : MonoBehaviour
         {
             if (!invencivel)
             {
+                audioJogador.PlayOneShot(somDash);
+                anim.SetBool("Ataque", true);
                 espada = true;
                 controleAtivo = false;
                 mudancaDirecao = false;
@@ -180,15 +218,16 @@ public class JogadorController : MonoBehaviour
 
         if (espada)
         {
-            anim.SetTrigger("Ataque");
-            fisicaJogador.velocity = new Vector2(0, fisicaJogador.velocity.y);
+            if (anim.GetBool("Ataque"))
+            {
+                fisicaJogador.velocity = new Vector2(0, fisicaJogador.velocity.y);
+            }
             espada = false;
         }
 
         // Invencibilidade após tomar dano
         if (invencivel)
         {
-
             tempoInvencibilidade += Time.deltaTime;
             if (tempoInvencibilidade > 2f)
             {
@@ -197,50 +236,73 @@ public class JogadorController : MonoBehaviour
                 anim.SetBool("Dano", false);
                 mudancaDirecao = true;
                 controleAtivo = true;
+
+                fisicaJogador.sharedMaterial.friction = 0f;
             }
         }
+
+        //Morte por cair do mapa
+        if (morteQueda)
+        {
+            fisicaJogador.gravityScale = 0;
+            fisicaJogador.velocity = Vector2.zero;
+            if (Input.anyKeyDown)
+            {
+                Morrer();
+            }
+        }
+        //Morte quando o tempo acabar
+        if (cronometro.tempoDeJogo <= 0)
+        {
+            Morrer();
+        }
     }
-    
+
+
     private void OnTriggerEnter2D(Collider2D objetoColidido)
     {
         if (colisorEspada.isActiveAndEnabled)
         {
             if (objetoColidido.gameObject.CompareTag("Enemy") && objetoColidido is BoxCollider2D)
             {
+                audioJogador.Stop();
+                audioJogador.PlayOneShot(somEspada);
                 Destroy(objetoColidido.gameObject);
             }
         }
         else
         {
-            if (objetoColidido.gameObject.CompareTag("Enemy") && objetoColidido is BoxCollider2D)
+            if (!invencivel)
             {
-                TomarDano(objetoColidido);
+                if ((objetoColidido.gameObject.CompareTag("Enemy") || objetoColidido.gameObject.CompareTag("Tiro Inimigo")) 
+                    && objetoColidido is BoxCollider2D)
+                {
+                    TomarDano(objetoColidido);
+                }
             }
+        }
+        //Caso o jogador caia do mapa
+        if (objetoColidido.gameObject.CompareTag("Buraco"))
+        {
+            morteQueda = true;
+        }
+        //Caso o jagador vença
+        if (objetoColidido.gameObject.CompareTag("Oculos"))
+        {
+            Morrer();
         }
     }
     private void OnCollisionEnter2D(Collision2D objetoColidido)
     {
-        if (objetoColidido.gameObject.CompareTag("Chao"))
-        {
-            contatoChao = true;
-            qtdPulos = 0;
-        }
         if (!invencivel)
         {
-            if (objetoColidido.gameObject.CompareTag("Chao"))
-            {
-                
-                espadaAereo = false;
-                controleAtivo = true;
-                mudancaDirecao = true;
-            }
-
             if (objetoColidido.gameObject.CompareTag("Enemy") || objetoColidido.gameObject.CompareTag("Tiro Inimigo"))
             {
                 TomarDano(objetoColidido.collider);
             }
         }
     }
+
     void TomarDano(Collider2D Inimigo)
     {
         mudancaDirecao = false;
@@ -250,7 +312,29 @@ public class JogadorController : MonoBehaviour
         fisicaJogador.velocity = Vector2.zero;
         fisicaJogador.AddForce(forcaRecuo);
         anim.SetBool("Dano", true);
+        audioJogador.PlayOneShot(somDano);
 
         invencivel = true;
+
+        fisicaJogador.sharedMaterial.friction = 1f;
+        //Morte ao perder a vida toda
+        vidaJogador -= 1;
+        if (vidaJogador <= 0)
+        {
+            Morrer();
+        }
+    }
+
+    void FinalizarAtaque()
+    {
+        anim.SetBool("Ataque", false);
+        controleAtivo = true;
+        mudancaDirecao = true;
+    }
+
+
+    void Morrer()
+    {       
+        SceneManager.LoadScene("SampleScene");
     }
 }

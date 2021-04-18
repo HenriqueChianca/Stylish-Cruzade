@@ -2,23 +2,31 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class Timer : MonoBehaviour
 {
 
-    float tempoDeJogo;
-    public Text cronometro;
+    public float tempoDeJogo;
+    int tempoint;
+    public TextMeshProUGUI cronometro;
 
     // Start is called before the first frame update
     void Start()
     {
-        tempoDeJogo = 0;
+        tempoDeJogo = 999;
     }
 
     // Update is called once per frame
     void Update()
     {
-        tempoDeJogo = tempoDeJogo + Time.deltaTime;
-        cronometro.text = tempoDeJogo.ToString("F2");
+        tempoDeJogo = tempoDeJogo - Time.deltaTime;
+        tempoint = Mathf.RoundToInt(tempoDeJogo);
+        cronometro.text = tempoint.ToString("000");
+
+        if (tempoint <= 0)
+        {
+            tempoint = 0;
+        }
     }
 }

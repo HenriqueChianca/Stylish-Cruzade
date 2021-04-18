@@ -36,31 +36,11 @@ public class TiroInimigoController : MonoBehaviour
         direcaoTiro.flipX = false;
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Player") && collision.collider is CapsuleCollider2D)
-        {
-            Desativar();
-        }
-        if (collision.gameObject.CompareTag("Enemy"))
-        {
-            colisorTiro.isTrigger = true;
-        }
-    }
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Enemy") && collision is CircleCollider2D)
+        if (collision.gameObject.CompareTag("Player") && collision is CapsuleCollider2D)
         {
-            colisorTiro.isTrigger = false;
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D collision)
-    {
-        if (collision.gameObject.CompareTag("Enemy") && colisorTiro.isTrigger && collision is BoxCollider2D)
-        {
-            colisorTiro.isTrigger = false;
+            Desativar();
         }
     }
 }

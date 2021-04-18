@@ -35,6 +35,13 @@ public class InimigoAtiradorController : InimigoController
         }
     }
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Player"))
+        {
+            anim.SetBool("Ataque", true);
+        }
+    }
     private void OnTriggerStay2D(Collider2D collision)
     {
         if (collision.CompareTag("Player"))
@@ -57,6 +64,7 @@ public class InimigoAtiradorController : InimigoController
         if (collision.CompareTag("Player"))
         {
             alvo = null;
+            anim.SetBool("Ataque", false);
         }
     }
 

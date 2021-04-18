@@ -7,6 +7,9 @@ TagManager:
   - Chao
   - Enemy
   - Tiro Inimigo
+  - Parede
+  - Buraco
+  - Oculos
   layers:
   - Default
   - TransparentFX
@@ -14,7 +17,7 @@ TagManager:
   - 
   - Water
   - UI
-  - 
+  - Ground
   - 
   - 
   - 
@@ -41,6 +44,9 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Underground and Walls
+    uniqueID: 1990992837
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0
