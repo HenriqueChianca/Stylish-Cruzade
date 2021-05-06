@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
+using UnityEngine.UI;
 
 public class JogadorController : MonoBehaviour
 {
@@ -46,6 +47,9 @@ public class JogadorController : MonoBehaviour
     public AudioClip somDano;
     public AudioClip somDash;
     AudioSource audioJogador;
+
+    public Image telaDeDerrota;
+    public Image telaDeVitoria;
 
     // Start is called before the first frame update
     void Start()
@@ -246,6 +250,7 @@ public class JogadorController : MonoBehaviour
         {
             fisicaJogador.gravityScale = 0;
             fisicaJogador.velocity = Vector2.zero;
+            telaDeDerrota.gameObject.SetActive(true);
             if (Input.anyKeyDown)
             {
                 Morrer();
@@ -289,7 +294,7 @@ public class JogadorController : MonoBehaviour
         //Caso o jagador vença
         if (objetoColidido.gameObject.CompareTag("Oculos"))
         {
-            Morrer();
+            Ganhar();
         }
     }
     private void OnCollisionEnter2D(Collision2D objetoColidido)
@@ -335,6 +340,11 @@ public class JogadorController : MonoBehaviour
 
     void Morrer()
     {       
+        SceneManager.LoadScene("SampleScene");
+    }
+    void Ganhar()
+    {
+        telaDeVitoria.gameObject.SetActive(true);
         SceneManager.LoadScene("SampleScene");
     }
 }

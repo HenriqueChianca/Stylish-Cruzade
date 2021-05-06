@@ -11,6 +11,7 @@ public class VidaJogador : MonoBehaviour
     public Sprite coracaoCheio;
     public Sprite coracaoMetade;
     public Sprite coracaoVazio;
+    public Image telaDeDerrota;
 
     // Start is called before the first frame update
     void Start()
@@ -80,6 +81,7 @@ public class VidaJogador : MonoBehaviour
             coracoes[0].sprite = coracaoVazio;
             coracoes[1].sprite = coracaoVazio;
             coracoes[2].sprite = coracaoVazio;
+            telaDeDerrota.gameObject.SetActive(true);
         }
     }
 }
