@@ -8,7 +8,7 @@ public class PoolingPlataforma : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
@@ -20,9 +20,11 @@ public class PoolingPlataforma : MonoBehaviour
     void AparecerPlataforma()
     {
         GameObject plataforma = pooling.PegaObjeto();
-
-        plataforma.transform.position = transform.position;
-        plataforma.SetActive(true);
-        plataforma.GetComponent<Rigidbody2D>().isKinematic = true;
+        if (plataforma != null)
+        {
+            plataforma.transform.position = transform.position;
+            plataforma.SetActive(true);
+            plataforma.GetComponent<Rigidbody2D>().isKinematic = true;
+        }
     }
 }

@@ -14,7 +14,7 @@ public class Timer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        tempoDeJogo = 999;
+        tempoDeJogo = 120;
     }
 
     // Update is called once per frame

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
+using UnityEngine.ParticleSystemJobs;
 
 public class JogadorController : MonoBehaviour
 {
@@ -41,16 +42,32 @@ public class JogadorController : MonoBehaviour
     Rigidbody2D fisicaJogador;
     Animator anim;
     BoxCollider2D colisorEspada;
-    CapsuleCollider2D colisor;
 
-    public AudioClip somEspada;
+    public AudioClip somEspadaAcertou;
+    public AudioClip somEspadaErrou;
     public AudioClip somDano;
     public AudioClip somDash;
+    public AudioClip somPulo;
+    public AudioClip audioVitoria;
+    public AudioClip audioDerrota;
     AudioSource audioJogador;
 
     public Image telaDeDerrota;
     public Image telaDeVitoria;
+    bool ganhou;
+    bool morreu;
 
+    public ParticleSystem poeira;
+    public ParticleSystem efeitoDash;
+    public ParticleSystemRenderer flipEfeitoDash;
+
+    AudioListener listener;
+
+    public AudioListener cameraListener;
+
+    public AudioSource musicaFase;
+
+    bool tocouAudio = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -58,12 +75,16 @@ public class JogadorController : MonoBehaviour
         anim = GetComponent<Animator>();
         colisorEspada = GetComponent<BoxCollider2D>();
         audioJogador = GetComponent<AudioSource>();
-        colisor = GetComponent<CapsuleCollider2D>();
+        listener = GetComponent<AudioListener>();
 
         invencivel = false;
 
         vidaMax = 6;
         vidaJogador = vidaMax;
+
+        ganhou = false;
+
+        musicaFase.Play();
     }
 
     // Update is called once per frame
@@ -72,6 +93,15 @@ public class JogadorController : MonoBehaviour
         contatoChao = Physics2D.OverlapCircle(posicaoPe.position, raioChecarChao, layerChao);
         //Movimentação do jogador. ControleAtivo serve para travar o jogador no momento que atacar.
         float controleJogador = Input.GetAxis("Horizontal");
+
+        //Ativação da partícula de poeira ao andar
+        if (contatoChao)
+        {
+            if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow))
+            {
+                AtivarPoeira();
+            }
+        }
         if (controleAtivo)
         {
             fisicaJogador.velocity = new Vector2(controleJogador * velocidade, fisicaJogador.velocity.y);
@@ -80,10 +110,14 @@ public class JogadorController : MonoBehaviour
         if (controleJogador > 0 && mudancaDirecao)
         {
             transform.eulerAngles = new Vector3(0, 0, 0);
+            //Mudança de direção da partícula de dash.
+            flipEfeitoDash.flip = Vector3.zero;
         }
         if (controleJogador < 0 && mudancaDirecao)
         {
             transform.eulerAngles = new Vector3(0, 180, 0);
+            //Mudança de direção da partícula de dash.
+            flipEfeitoDash.flip = Vector3.right;
         }
 
 
@@ -120,6 +154,12 @@ public class JogadorController : MonoBehaviour
         {
             if (!invencivel && qtdPulos < 2)
             {
+                //Ativação da partícula de poeira ao pular
+                AtivarPoeira();
+                audioJogador.PlayOneShot(somPulo);
+            }
+            if (!invencivel && qtdPulos < 2)
+            {
                 anim.SetBool("Chao", false);
                 anim.SetTrigger("Pulo");
                 if (qtdPulos == 0)
@@ -148,6 +188,7 @@ public class JogadorController : MonoBehaviour
                     timerAtualDash = dashTimer;
                     fisicaJogador.velocity = Vector2.zero;
                     audioJogador.PlayOneShot(somDash);
+                    efeitoDash.Play();
                     if (!contatoChao)
                     {
                         contadorDash++;
@@ -194,9 +235,13 @@ public class JogadorController : MonoBehaviour
         {
             if (!invencivel)
             {
+                if (!espadaAereo)
+                {
+                    audioJogador.PlayOneShot(somEspadaErrou);
+                }
                 espadaAereo = true;
                 mudancaDirecao = false;
-                audioJogador.PlayOneShot(somDash);
+                
             }
         }
 
@@ -212,7 +257,7 @@ public class JogadorController : MonoBehaviour
         {
             if (!invencivel)
             {
-                audioJogador.PlayOneShot(somDash);
+                audioJogador.PlayOneShot(somEspadaErrou);
                 anim.SetBool("Ataque", true);
                 espada = true;
                 controleAtivo = false;
@@ -248,9 +293,18 @@ public class JogadorController : MonoBehaviour
         //Morte por cair do mapa
         if (morteQueda)
         {
+            if (!audioJogador.isPlaying && !tocouAudio)
+            {
+                audioJogador.PlayOneShot(audioDerrota);
+                tocouAudio = true;
+            }
+            musicaFase.Stop();
             fisicaJogador.gravityScale = 0;
             fisicaJogador.velocity = Vector2.zero;
+            invencivel = true;
             telaDeDerrota.gameObject.SetActive(true);
+            listener.enabled = false;
+            cameraListener.enabled = true;
             if (Input.anyKeyDown)
             {
                 Morrer();
@@ -259,7 +313,59 @@ public class JogadorController : MonoBehaviour
         //Morte quando o tempo acabar
         if (cronometro.tempoDeJogo <= 0)
         {
-            Morrer();
+            if (!audioJogador.isPlaying && !tocouAudio)
+            {
+                audioJogador.PlayOneShot(audioDerrota);
+                tocouAudio = true;
+            }
+            musicaFase.Stop();
+            telaDeDerrota.gameObject.SetActive(true);
+            invencivel = true;
+            fisicaJogador.velocity = Vector2.zero;
+            fisicaJogador.isKinematic = true;
+            listener.enabled = false;
+            cameraListener.enabled = true;
+            if (Input.anyKeyDown)
+            {
+                Morrer();
+            }
+        }
+        //Em caso de vitória
+        if (ganhou)
+        {
+            if (!audioJogador.isPlaying && !tocouAudio)
+            {
+                audioJogador.PlayOneShot(audioVitoria);
+                tocouAudio = true;
+            }
+            musicaFase.Stop();
+            listener.enabled = false;
+            cameraListener.enabled = true;
+            fisicaJogador.isKinematic = true;
+            invencivel = true;
+            if (Input.anyKeyDown)
+            {
+                Ganhar();
+            }
+        }
+        //Em caso do jogador morrer por tomar dano
+        if (morreu)
+        {
+            if (!audioJogador.isPlaying && !tocouAudio)
+            {
+                audioJogador.PlayOneShot(audioDerrota);
+                tocouAudio = true;
+            }
+            musicaFase.Stop();
+            listener.enabled = false;
+            cameraListener.enabled = true;
+            invencivel = true;
+            fisicaJogador.velocity = Vector2.zero;
+            fisicaJogador.isKinematic = true;
+            if (Input.anyKeyDown)
+            {
+                Morrer();
+            }
         }
     }
 
@@ -271,7 +377,7 @@ public class JogadorController : MonoBehaviour
             if (objetoColidido.gameObject.CompareTag("Enemy") && objetoColidido is BoxCollider2D)
             {
                 audioJogador.Stop();
-                audioJogador.PlayOneShot(somEspada);
+                audioJogador.PlayOneShot(somEspadaAcertou);
                 Destroy(objetoColidido.gameObject);
             }
         }
@@ -294,7 +400,9 @@ public class JogadorController : MonoBehaviour
         //Caso o jagador vença
         if (objetoColidido.gameObject.CompareTag("Oculos"))
         {
-            Ganhar();
+            objetoColidido.gameObject.SetActive(false);
+            telaDeVitoria.gameObject.SetActive(true);
+            ganhou = true;
         }
     }
     private void OnCollisionEnter2D(Collision2D objetoColidido)
@@ -326,7 +434,8 @@ public class JogadorController : MonoBehaviour
         vidaJogador -= 1;
         if (vidaJogador <= 0)
         {
-            Morrer();
+            telaDeDerrota.gameObject.SetActive(true);
+            morreu = true;
         }
     }
 
@@ -339,12 +448,16 @@ public class JogadorController : MonoBehaviour
 
 
     void Morrer()
-    {       
-        SceneManager.LoadScene("SampleScene");
+    {
+        SceneManager.LoadScene(0);
     }
     void Ganhar()
     {
-        telaDeVitoria.gameObject.SetActive(true);
-        SceneManager.LoadScene("SampleScene");
+        SceneManager.LoadScene(0);
+    }
+
+    void AtivarPoeira()
+    {
+        poeira.Play();
     }
 }

@@ -11,6 +11,9 @@ public class InimigoAtiradorController : InimigoController
     float timer;
     float tempoEntreTiros = 1.2f;
 
+    public AudioSource sourceFerrao;
+    public AudioClip audioFerrao;
+
     public PoolingTiro poolingDotiro;
 
 
@@ -84,5 +87,6 @@ public class InimigoAtiradorController : InimigoController
             tiroInimigo.SetActive(true);
             tiroInimigo.GetComponent<SpriteRenderer>().flipX = true;
         }
+        sourceFerrao.PlayOneShot(audioFerrao);
     }
 }

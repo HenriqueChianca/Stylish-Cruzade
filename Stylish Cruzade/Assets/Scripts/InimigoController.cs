@@ -13,12 +13,16 @@ public class InimigoController : MonoBehaviour
     public Transform[] pontos;
     protected Animator anim;
 
+    AudioSource audioInimigo;
+    public AudioClip inimigoAndando;
+
     // Start is called before the first frame update
     protected virtual void Start()
     {
         fisicaInimigo = GetComponent<Rigidbody2D>();
         spriteInimigo = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
+        audioInimigo = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame

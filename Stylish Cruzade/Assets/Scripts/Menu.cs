@@ -6,12 +6,6 @@ using UnityEngine.SceneManagement;
 
 public class Menu : MonoBehaviour
 {
-    public AudioSource musicaInicial;
-
-     void Start()
-    {
-        musicaInicial.Play();
-    }
     public void jogar()
     {
         SceneManager.LoadScene("SampleScene");
